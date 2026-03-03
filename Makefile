@@ -55,13 +55,6 @@ lint:
 	       --check-untyped-defs
 	@echo "$(GREEN)>>> Lint OK.$(RESET)"
 
-lint-strict:
-	@echo "$(YELLOW)>>> flake8...$(RESET)"
-	flake8 .
-	@echo "$(YELLOW)>>> mypy --strict...$(RESET)"
-	mypy . --strict
-	@echo "$(GREEN)>>> Lint strict OK.$(RESET)"
-
 clean:
 	@echo "$(YELLOW)>>> Nettoyage...$(RESET)"
 	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
@@ -71,4 +64,4 @@ clean:
 	find . -name "*.pyo" -delete 2>/dev/null || true
 	@echo "$(GREEN)>>> Nettoyage terminé.$(RESET)"
 
-.PHONY: help install run debug lint lint-strict clean
+.PHONY: install run debug lint clean

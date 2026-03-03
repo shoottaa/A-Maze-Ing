@@ -31,9 +31,9 @@ def parse_coords(raw: str, key: str) -> Tuple[int, int]:
 
 def parse_bool(raw: str, key: str) -> bool:
     lowered = raw.strip().lower()
-    if lowered in ("true", "1", "yes"):
+    if lowered == "true":
         return True
-    if lowered in ("false", "0", "no"):
+    if lowered == "false":
         return False
     print(f"Error: bad bool for {key}: '{raw}'")
     sys.exit(1)
@@ -109,7 +109,7 @@ def parse_config(file_path: str) -> Dict[str, Any]:
 
     missing = REQUIRED_KEYS - config.keys()
     if missing:
-        print(f"Error : missing keys : {', '.join(missing)}")
+        print(f"Error: missing keys: {', '.join(missing)}")
         sys.exit(1)
 
     return validate_config(config)

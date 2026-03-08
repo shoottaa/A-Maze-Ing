@@ -1,14 +1,8 @@
 import sys
 from src.parse_config import parse_config
-
-
-def show_menu() -> str:
-    print("\n=== A-Maze-ing ===")
-    print("1. Re-générer un nouveau labyrinthe")
-    print("2. Afficher / Cacher le chemin")
-    print("3. Changer la couleur des murs")
-    print("4. Quitter")
-    return input("Choix (1-4) : ").strip()
+from src.generate import generate_maze
+from src.maze import Maze
+from src.display import Display, CELL_SIZE
 
 
 def main() -> None:
@@ -18,18 +12,35 @@ def main() -> None:
 
     config = parse_config(sys.argv[1])
 
-    while True:
-        choice = show_menu()
-        if choice == "1":
-            pass
-        elif choice == "2":
-            pass
-        elif choice == "3":
-            pass
-        elif choice == "4":
-            sys.exit(0)
-        else:
-            print("Invalid choice.")
+    maze = Maze(config["WIDTH"], config["HEIGHT"],
+                config["ENTRY"], config["EXIT"])
+    generate_maze(maze, perfect=config["PERFECT"])
+
+    maze_params = {
+        'WIDTH': config["WIDTH"],
+        'HEIGHT': config["HEIGHT"],
+        'ENTRY': config["ENTRY"],
+        'EXIT': config["EXIT"],
+        'PERFECT': config["PERFECT"],
+    }
+
+    buttons = [
+        {"label": "R: Regen;",   "action": None},
+        {"label": "P: Path;", "action": None},
+        {"label": "C: Color;", "action": None},
+        {"label": "ESC: Exit;", "action": None},
+    ]
+
+    display = Display(config["WIDTH"] * CELL_SIZE,
+                      config["HEIGHT"] * CELL_SIZE,
+                      maze_params=maze_params,
+                      generate_maze_func=generate_maze,
+                      buttons=buttons)
+
+    buttons[0]["action"] = display.regenerate
+    buttons[2]["action"] = display.cycle_color
+    display.set_maze(maze)
+    display.draw_maze()
 
 
 if __name__ == "__main__":

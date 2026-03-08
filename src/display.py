@@ -1,7 +1,7 @@
 import random
 from mlx import Mlx  # type: ignore
 from src.maze import Maze, NORTH, SOUTH, EAST, WEST
-from src.color import ColorManager  # type: ignore
+from src.color import ColorManager, WALL_COLORS  # type: ignore
 
 CELL_SIZE = 20
 WALL_SIZE = 3
@@ -35,6 +35,8 @@ class Display:
         self.generate_maze_func = generate_maze_func
         self.need_redraw = True
         self.color_manager = ColorManager()
+        self.entry = None
+        self.exit = None
 
     def clear_image(self) -> None:
         """Remplit l'image de noir pour clear l'affichage"""
@@ -47,6 +49,14 @@ class Display:
         offset = (py * self.sl) + (px * (self.bpp // 8))
         if offset + 4 <= len(self.pythondata):
             self.pythondata[offset:offset + 4] = color
+
+    def draw_enter(self, x: int, y: int) -> None:
+        """Dessine l'entrée du maze"""
+        self.entry = (x, y)
+
+    def draw_exit(self, x: int, y: int) -> None:
+        """Dessine la sortie du maze"""
+        self.exit = (x, y)
 
     def draw_horizontal_wall(self, x: int, y: int, y_offset: int) -> None:
         """Dessine un mur horizontal au-dessus (y_offset=0)
@@ -151,6 +161,14 @@ class Display:
             for y in range(self.maze.height):
                 for x in range(self.maze.width):
                     self.draw_cell(x, y)
+            if self.entry:
+                last_index = (self.color_manager.index - 1) % len(WALL_COLORS)
+                entry_color = WALL_COLORS[last_index].to_bytes(4, 'little')
+                self._fill_interior(self.entry[0], self.entry[1], entry_color)
+            if self.exit:
+                next_index = (self.color_manager.index + 1) % len(WALL_COLORS)
+                exit_color = WALL_COLORS[next_index].to_bytes(4, 'little')
+                self._fill_interior(self.exit[0], self.exit[1], exit_color)
             self.need_redraw = False
         self.mlx.mlx_put_image_to_window(self.mlx_ptr, self.win,
                                          self.img, 0, 0)

@@ -41,6 +41,8 @@ def main() -> None:
     buttons[0]["action"] = display.regenerate
     buttons[2]["action"] = display.cycle_color
     display.set_maze(maze)
+    display.draw_enter(config["ENTRY"][0], config["ENTRY"][1])
+    display.draw_exit(config["EXIT"][0], config["EXIT"][1])
     display.draw_maze()
 
 

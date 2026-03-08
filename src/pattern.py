@@ -24,51 +24,51 @@ GAP = 2
 
 
 def pattern_42(maze: Maze) -> None:
-    h = len(DIGIT_4)
-    w4 = len(DIGIT_4[0])
-    w2 = len(DIGIT_2[0])
-    total_w = w4 + GAP + w2
+    pattern_height = len(DIGIT_4)
+    digit4_width = len(DIGIT_4[0])
+    digit2_width = len(DIGIT_2[0])
+    total_width = digit4_width + GAP + digit2_width
 
     # Le pattern ne s'affiche qu'à partir de 21x16
     if maze.width < 21 or maze.height < 16:
         maze.pattern_cells = set()
-        print("Pattern 42 : Taille insuffisante (minimum 21x16)")
         return
 
-    x0 = (maze.width - total_w) // 2
-    y0 = (maze.height - h) // 2
-    x2 = x0 + w4 + GAP
-
-    maze.stamp_y0 = y0
-    maze.stamp_h = h
+    # Centre le pattern horizontalement
+    digit4_start_x = (maze.width - total_width) // 2
+    # Positionne le 2 à droite du 4
+    digit2_start_x = digit4_start_x + digit4_width + GAP
+    # Centre verticalement le pattern et devient la pos initiale du 4 et du 2
+    start_y = (maze.height - pattern_height) // 2
 
     # Construction de l'ensemble des positions du pattern
     pattern_cells = set()
-    for row in range(h):
-        for col in range(w4):
+    for row in range(pattern_height):
+        for col in range(digit4_width):
             if DIGIT_4[row][col]:
-                pattern_cells.add((x0 + col, y0 + row))
-        for col in range(w2):
+                pattern_cells.add((digit4_start_x + col, start_y + row))
+        for col in range(digit2_width):
             if DIGIT_2[row][col]:
-                pattern_cells.add((x2 + col, y0 + row))
+                pattern_cells.add((digit2_start_x + col, start_y + row))
 
     maze.pattern_cells = pattern_cells
 
     # Ferme tous les murs des cellules du pattern
-    for (px, py) in pattern_cells:
-        maze.get_cell(px, py).walls = 0xF
+    for (cell_x, cell_y) in pattern_cells:
+        maze.get_cell(cell_x, cell_y).walls = 0xF
 
-    # Restaure les murs ouverts
+    # Ferme les murs autour
     directions = [
-        (0, -1, 0x4, 0x1),  # Nord du pattern : ferme mur SUD
-        (0, +1, 0x1, 0x4),  # Sud du pattern : ferme mur NORD
-        (-1, 0, 0x2, 0x8),  # Ouest du pattern : restaure son mur EST
-        (+1, 0, 0x8, 0x2),  # Est du pattern : restaure son mur OUEST
+        (0, -1, 0x4),  # Nord ferme Sud
+        (0, +1, 0x1),  # Sud ferme Nord
+        (-1, 0, 0x2),  # Ouest ferme Est
+        (+1, 0, 0x8),  # Est ferme Ouest
     ]
 
-    for (px, py) in pattern_cells:
-        for dx, dy, _pattern_wall, neighbor_wall in directions:
-            nx, ny = px + dx, py + dy
-            if 0 <= nx < maze.width and 0 <= ny < maze.height:
-                if (nx, ny) not in pattern_cells:
-                    maze.get_cell(nx, ny).walls |= neighbor_wall
+    for (cell_x, cell_y) in pattern_cells:
+        for offset_x, offset_y, wall_to_restore in directions:
+            neighbor_x = cell_x + offset_x
+            neighbor_y = cell_y + offset_y
+            if 0 <= neighbor_x < maze.width and 0 <= neighbor_y < maze.height:
+                if (neighbor_x, neighbor_y) not in pattern_cells:
+                    maze.get_cell(neighbor_x, neighbor_y).walls |= wall_to_restore

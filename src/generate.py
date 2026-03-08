@@ -1,5 +1,6 @@
 import random
 from src.maze import Maze
+from src.pattern import pattern_42
 
 
 def get_neighbors(maze: Maze, x: int, y: int) -> list:
@@ -34,6 +35,7 @@ def open_between(maze: Maze, from_x: int, from_y: int,
         cell_from.remove_wall(0x1)   # NORTH
         cell_to.remove_wall(0x4)     # SOUTH
 
+
 """
 DFS : Recursive backtracker
 1. On part de l'entrée
@@ -43,6 +45,7 @@ DFS : Recursive backtracker
 5. On retourne à l'étape 2 jusqu'à ce que toutes les cellules voisines soient visitées
 6. On revient en arrière jusqu'à trouver une cellule avec des voisins non visités
 """
+
 
 def generate_maze(maze: Maze, seed: int = 42,
                   perfect: bool = True) -> None:
@@ -61,15 +64,15 @@ def generate_maze(maze: Maze, seed: int = 42,
                 unvisited.append(neighbor)
 
         if unvisited:
-            
-            next_x, next_y = random.choice(unvisited) # On choisit un voisin au hasard
-            open_between(maze, x, y, next_x, next_y)  # On casse le mur
+            next_x, next_y = random.choice(unvisited)  # On choisit un voisin au hasard
+            open_between(maze, x, y, next_x, next_y)   # On casse le mur
             visited.add((next_x, next_y))
             stack.append((next_x, next_y))  # On avance
         else:
             # Aucun voisin libre, on recule d'une case
             stack.pop()
 
+    pattern_42(maze)
 
     if not perfect:
         # On cherche tous les murs encore debout pour en casser 10%

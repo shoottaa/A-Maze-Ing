@@ -24,6 +24,7 @@ GAP = 2
 
 
 def pattern_42(maze: Maze) -> None:
+    """Ajoute un pattern 42 au centre, en fermant les murs des cellules"""
     pattern_height = len(DIGIT_4)
     digit4_width = len(DIGIT_4[0])
     digit2_width = len(DIGIT_2[0])
@@ -57,7 +58,7 @@ def pattern_42(maze: Maze) -> None:
     for (cell_x, cell_y) in pattern_cells:
         maze.get_cell(cell_x, cell_y).walls = 0xF
 
-    # Ferme les murs autour
+    # Ferme les murs autour du pattern
     directions = [
         (0, -1, 0x4),  # Nord ferme Sud
         (0, +1, 0x1),  # Sud ferme Nord
@@ -71,4 +72,5 @@ def pattern_42(maze: Maze) -> None:
             neighbor_y = cell_y + offset_y
             if 0 <= neighbor_x < maze.width and 0 <= neighbor_y < maze.height:
                 if (neighbor_x, neighbor_y) not in pattern_cells:
-                    maze.get_cell(neighbor_x, neighbor_y).walls |= wall_to_restore
+                    maze.get_cell(neighbor_x, neighbor_y).walls \
+                                                            |= wall_to_restore

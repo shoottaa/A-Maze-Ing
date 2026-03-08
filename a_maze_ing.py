@@ -6,6 +6,7 @@ from src.display import Display, CELL_SIZE
 
 
 def main() -> None:
+    """Fonction principale"""
     if len(sys.argv) != 2:
         print("Usage: python a_maze_ing.py <input_file>")
         sys.exit(1)

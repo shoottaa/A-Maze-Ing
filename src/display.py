@@ -16,11 +16,12 @@ class Display:
 
     def __init__(self, width: int, height: int, maze_params=None,
                  generate_maze_func=None, buttons=None) -> None:
+        """Initialise la fenêtre et les paramètres d'affichage du maze"""
         self.maze_height = height
         self.width = width + 2 * MAZE_MARGIN
         self.height = (height + 2 * MAZE_MARGIN + BUTTON_MARGIN +
                        BUTTON_H + BUTTON_MARGIN)
-        self.buttons = buttons or []
+        self.buttons = buttons
         self.mlx = Mlx()
         self.mlx_ptr = self.mlx.mlx_init()
         self.win = self.mlx.mlx_new_window(self.mlx_ptr, self.width,
@@ -36,16 +37,20 @@ class Display:
         self.color_manager = ColorManager()
 
     def clear_image(self) -> None:
+        """Remplit l'image de noir pour clear l'affichage"""
         black = (0xFF000000).to_bytes(4, 'little') * (len(self.pythondata)
                                                       // 4)
         self.pythondata[:] = black
 
     def _put_pixel(self, px: int, py: int, color: bytes) -> None:
+        """Place un pixel de la couleur donnée à la position (px, py)"""
         offset = (py * self.sl) + (px * (self.bpp // 8))
         if offset + 4 <= len(self.pythondata):
             self.pythondata[offset:offset + 4] = color
 
     def draw_horizontal_wall(self, x: int, y: int, y_offset: int) -> None:
+        """Dessine un mur horizontal au-dessus (y_offset=0)
+        ou en-dessous (y_offset=1)"""
         row = (y + y_offset) * CELL_SIZE + MAZE_MARGIN
         color = self.color_manager.current()
         for t in range(WALL_SIZE):
@@ -54,6 +59,8 @@ class Display:
                 self._put_pixel(px, row + t, color)
 
     def draw_vertical_wall(self, x: int, y: int, x_offset: int) -> None:
+        """Dessine un mur vertical à gauche (x_offset=0)
+        ou à droite (x_offset=1)"""
         col = (x + x_offset) * CELL_SIZE + MAZE_MARGIN
         color = self.color_manager.current()
         for t in range(WALL_SIZE):
@@ -62,9 +69,11 @@ class Display:
                 self._put_pixel(col + t, py, color)
 
     def set_maze(self, maze: Maze) -> None:
+        """Assigne un maze à afficher """
         self.maze = maze
 
     def _fill_interior(self, x: int, y: int, color: bytes) -> None:
+        """Remplit l'intérieur d'une cellule de la couleur donnée"""
         x_start = x * CELL_SIZE + MAZE_MARGIN + WALL_SIZE
         y_start = y * CELL_SIZE + MAZE_MARGIN + WALL_SIZE
         x_end = (x + 1) * CELL_SIZE + MAZE_MARGIN
@@ -74,10 +83,12 @@ class Display:
                 self._put_pixel(px, py, color)
 
     def draw_cell(self, x: int, y: int) -> None:
+        """Dessine les murs d'une cellule et remplit l'intérieur
+        si c'est un pattern"""
         cell = self.maze.get_cell(x, y)
         if (x, y) in self.maze.pattern_cells:
             b, g, r, a = self.color_manager.current()
-            interior = bytes([b // 4, g // 4, r // 4, a])
+            interior = bytes([b // 4, g // 4, r // 4, a])  # Assombrit la color
             self._fill_interior(x, y, interior)
         if cell.has_wall(NORTH):
             self.draw_horizontal_wall(x, y, 0)
@@ -89,14 +100,16 @@ class Display:
             self.draw_vertical_wall(x, y, 1)
 
     def _button_rects(self):
+        """Calcule les rectangles de chaque bouton pour le dessin des labels"""
         n = len(self.buttons)
         total_w = n * BUTTON_W + (n - 1) * BUTTON_GAP
-        x0 = (self.width - total_w) // 2 - 30
+        x0 = (self.width - total_w) // 2 - 30  # Centre les boutons + decalage
         y0 = self.maze_height + MAZE_MARGIN + BUTTON_MARGIN
         return [(x0 + i * (BUTTON_W + BUTTON_GAP), y0, BUTTON_W, BUTTON_H)
                 for i in range(n)]
 
     def draw_button_labels(self) -> None:
+        """Affiche les labels des boutons"""
         if not self.buttons:
             return
         for (bx, by, bw, bh), btn in zip(self._button_rects(), self.buttons):
@@ -105,10 +118,12 @@ class Display:
                                     0xFFFFFFFF, btn["label"])
 
     def cycle_color(self) -> None:
+        """Change la couleur des murs en fonction de WALL_COLORS"""
         self.color_manager.cycle()
         self.need_redraw = True
 
     def regenerate(self) -> None:
+        """Génère un nouveau maze"""
         if not (self.maze_params and self.generate_maze_func):
             return
         params = self.maze_params
@@ -119,7 +134,8 @@ class Display:
         self.set_maze(maze)
         self.need_redraw = True
 
-    def close_window(self, key, param) -> None:
+    def key_pressed(self, key, param) -> None:
+        """Gestion des touches ci-dessous"""
         if key == 65307:   # Échap
             self.mlx.mlx_loop_exit(self.mlx_ptr)
         elif key == 114:   # R
@@ -128,6 +144,8 @@ class Display:
             self.cycle_color()
 
     def render(self, param) -> None:
+        """Affiche le maze et les labels des boutons.
+        Re-dessine le maze seulement si besoin"""
         if self.need_redraw:
             self.clear_image()
             for y in range(self.maze.height):
@@ -139,10 +157,11 @@ class Display:
         self.draw_button_labels()
 
     def draw_maze(self) -> None:
+        """Affiche la fenêtre et le maze"""
         if self.maze is None:
             print("Error: Maze not set for display.")
             return
         self.mlx.mlx_loop_hook(self.mlx_ptr, self.render, None)
-        self.mlx.mlx_key_hook(self.win, self.close_window, None)
+        self.mlx.mlx_key_hook(self.win, self.key_pressed, None)
         self.mlx.mlx_mouse_hide(self.mlx_ptr)
         self.mlx.mlx_loop(self.mlx_ptr)

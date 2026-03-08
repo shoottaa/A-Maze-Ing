@@ -12,10 +12,13 @@ WALL_COLORS = [
 class ColorManager:
 
     def __init__(self) -> None:
+        """Gère la couleur des murs en fonction de WALL_COLORS"""
         self.index = 0
 
     def current(self) -> bytes:
+        """Retourne la couleur actuelle des murs"""
         return WALL_COLORS[self.index].to_bytes(4, 'little')
 
     def cycle(self) -> None:
+        """Change la couleur des murs en fonction de WALL_COLORS"""
         self.index = (self.index + 1) % len(WALL_COLORS)

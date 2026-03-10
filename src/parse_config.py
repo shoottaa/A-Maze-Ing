@@ -1,3 +1,4 @@
+import random
 import sys
 from typing import Any, Dict, Tuple
 
@@ -65,6 +66,15 @@ def validate_config(config: Dict[str, Any]) -> Dict[str, Any]:
         sys.exit(1)
     validated["OUTPUT_FILE"] = out
     validated["PERFECT"] = parse_bool(config["PERFECT"], "PERFECT")
+
+    if "SEED" in config:
+        try:
+            validated["SEED"] = int(config["SEED"].strip())
+        except ValueError:
+            print(f"Error: SEED must be an int: '{config['SEED']}'")
+            sys.exit(1)
+    else:
+        validated["SEED"] = random.randint(0, 2**31)
 
     w = validated["WIDTH"]
     h = validated["HEIGHT"]

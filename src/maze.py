@@ -1,10 +1,10 @@
-from typing import List, Tuple
+from typing import List, Set, Tuple
 
 
 NORTH = 0x1  # 0001
 EAST = 0x2  # 0010
-SOUTH = 0x4 # 0100
-WEST = 0x8 # 1000
+SOUTH = 0x4  # 0100
+WEST = 0x8  # 1000
 
 # (offset_x, offset_y, mur, lettre)
 DIRECTIONS = [
@@ -23,29 +23,36 @@ OPPOSITE = {
 
 
 class Cell:
+    """Represente une cellule en 4 bits des murs."""
     def __init__(self, x: int, y: int) -> None:
+        """Initialise une cellule en x/y avec les 4 murs fermes"""
         self.x = x
         self.y = y
-        self.walls = 0xF  # 1111 = les 4 murs fermes
+        self.walls = 0xF
 
     def has_wall(self, direction: int) -> bool:
-        # AND bitwise : garde uniquement le bit de la direction
-        # Ex: 1101 & 0010 = 0000 -> False -> pas de mur est
+        """Renvoie True si le mur dans la direction donnee est ferme"""
         return bool(self.walls & direction)
 
     def remove_wall(self, direction: int) -> None:
-        # Inverse les bits, & enlève le bit de la direction
-        # Ex: ~0010 = 1101, 1111 & 1101 = 1101 -> mur est cassé
+        """Supprime le mur dans la direction donnee"""
         self.walls &= ~direction
 
     def to_hex(self) -> str:
+        """Renvoie le caractere hex des bits des murs"""
         return format(self.walls, 'X')
 
 
 class Maze:
+    """Represente la grille de toutes les cellules"""
     def __init__(self, width: int, height: int,
                  entry: Tuple[int, int],
                  exit_pos: Tuple[int, int]) -> None:
+        """Initialise la grille avec tous les murs fermes
+            width: Nombre de colonnes
+            height: Nombre de lignes
+            entry: Coordonnees x/y de l'entree
+            exit_pos: Coordonnees x/y de la sortie"""
         self.width = width
         self.height = height
         self.entry = entry
@@ -56,9 +63,10 @@ class Maze:
             for x in range(width):
                 row.append(Cell(x, y))
             self.grid.append(row)
-        self.pattern_cells: set = set()
+        self.pattern_cells: Set[Tuple[int, int]] = set()
 
     def get_cell(self, x: int, y: int) -> Cell:
+        """Renvoie la cellule (objet Cell) en x/y"""
         if x < 0 or x >= self.width or y < 0 or y >= self.height:
             raise ValueError(f"Cell ({x},{y}) OOB")
         return self.grid[y][x]

@@ -1,30 +1,23 @@
+from typing import Dict, List, Optional, Tuple
 from src.maze import Maze, DIRECTIONS
 
 
-"""
-BFS : Breadth-First Search
-1. On part de l'entrée, on l'ajoute dans la file
-2. On prend le premier élément de la file
-3. Pour chaque voisin accessible :
-- Si pas encore visité, on l'ajoute dans la file
-- On note d'où on vient (parent) et la direction prise
-- Dès qu'on atteint la sortie, on remonte les parents
-"""
-
-
-def solve(maze: Maze) -> None:
+def solve(maze: Maze) -> Optional[str]:
+    """Trouve le plus court chemin de l'entree a la sortie via BFS
+    Retourne: Directions (Ex: NNNEESSW) ou None"""
     start = maze.entry
     end = maze.exit_pos
 
-    
-    visited = {start}  # Ex: {(0,0), (1,0), (2,0)}
-    queue = [start]  # Ex: [(1,0), (0,1)] = cellules à traiter (first in first out)
-    parent = {}  # Ex: {(1,0): ((0,0), "E")}
+    visited = {start}
+    queue = [start]
+    parent: Dict[
+        Tuple[int, int], Tuple[Tuple[int, int], str]
+    ] = {}
 
     while queue:
-        x, y = queue.pop(0)  # On prend le premier de la file
+        x, y = queue.pop(0)
 
-        if (x, y) == end:  # Sortie de fonction si on trouve la sortie
+        if (x, y) == end:
             return reconstruct(parent, start, end)
 
         cell = maze.get_cell(x, y)
@@ -35,23 +28,27 @@ def solve(maze: Maze) -> None:
             if cell.has_wall(wall):
                 continue
             if next_x < 0 or next_x >= maze.width:
-                continue 
+                continue
             if next_y < 0 or next_y >= maze.height:
                 continue
             visited.add((next_x, next_y))
-            parent[(next_x, next_y)] = ((x, y), letter)  # On note le parent
-            queue.append((next_x, next_y))  # On ajoute dans la file
+            parent[(next_x, next_y)] = ((x, y), letter)
+            queue.append((next_x, next_y))
 
     return None
 
 
-def solve_cells(maze: Maze) -> list[tuple]:
+def solve_cells(maze: Maze) -> List[Tuple[int, int]]:
+    """Renvoie la liste des cellules x/y du plus court chemin"""
     path_str = solve(maze)
     if not path_str:
         return []
-    convert_letter = {"N": (0, -1), "S": (0, 1), "E": (1, 0), "W": (-1, 0)}
+    convert_letter = {
+        "N": (0, -1), "S": (0, 1),
+        "E": (1, 0), "W": (-1, 0),
+    }
     x, y = maze.entry
-    cells = [(x, y)]
+    cells: List[Tuple[int, int]] = [(x, y)]
     for letter in path_str:
         dir_x, dir_y = convert_letter[letter]
         x += dir_x
@@ -60,8 +57,13 @@ def solve_cells(maze: Maze) -> list[tuple]:
     return cells
 
 
-def reconstruct(parent: dict, start: tuple, end: tuple) -> str:
-    letters = []
+def reconstruct(
+    parent: Dict[Tuple[int, int], Tuple[Tuple[int, int], str]],
+    start: Tuple[int, int],
+    end: Tuple[int, int],
+) -> str:
+    """Reconstruit la chaine de directions depuis le dictionnaire parent"""
+    letters: List[str] = []
     current = end
 
     while current != start:
@@ -69,13 +71,12 @@ def reconstruct(parent: dict, start: tuple, end: tuple) -> str:
         letters.append(letter)
         current = prev
 
-    letters.reverse()  # On a remonté à l'envers, on inverse
+    letters.reverse()
     return "".join(letters)
 
 
-
 def write_output(maze: Maze, filepath: str) -> None:
-    # Écrit le maze au format du sujet
+    """Ecrit le labyrinthe et la solution dans un fichier au format du sujet"""
     path_str = solve(maze)
     if path_str is None:
         path_str = ""
@@ -90,17 +91,8 @@ def write_output(maze: Maze, filepath: str) -> None:
 
             f.write("\n")
             f.write(f"{maze.entry[0]},{maze.entry[1]}\n")
-            f.write(f"{maze.exit_pos[0]},{maze.exit_pos[1]}\n")
+            ex = maze.exit_pos
+            f.write(f"{ex[0]},{ex[1]}\n")
             f.write(path_str + "\n")
     except OSError as e:
-        print(f"Could not write file output.")
-
-
-if __name__ == "__main__":
-    # python3 -m src.solve
-    # python3 output_validator.py maze.txt
-    from src.generate import generate_maze
-
-    m = Maze(20, 15, (0, 0), (19, 14))
-    generate_maze(m, seed=42, perfect=True)
-    write_output(m, "maze.txt")
+        print(f"Erreur d'écriture: {e}")

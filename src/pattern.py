@@ -33,6 +33,8 @@ def pattern_42(maze: Maze) -> None:
     # Le pattern ne s'affiche qu'à partir de 21x16
     if maze.width < 21 or maze.height < 16:
         maze.pattern_cells = set()
+        print("[WARNING] Labyrinthe trop petit pour afficher le pattern. "
+              "(Minimum 21x16)")
         return
 
     # Centre le pattern horizontalement

@@ -91,8 +91,7 @@ def write_output(maze: Maze, filepath: str) -> None:
 
             f.write("\n")
             f.write(f"{maze.entry[0]},{maze.entry[1]}\n")
-            ex = maze.exit_pos
-            f.write(f"{ex[0]},{ex[1]}\n")
+            f.write(f"{maze.exit_pos[0]},{maze.exit_pos[1]}\n")
             f.write(path_str + "\n")
     except OSError as e:
         print(f"Erreur d'écriture: {e}")

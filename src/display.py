@@ -206,9 +206,13 @@ class Display:
                 if (x, y) != self.entry and (x, y) != self.exit:
                     self._fill_interior(x, y, path_color)
                 self.path_index += 1
-        self.mlx.mlx_put_image_to_window(self.mlx_ptr, self.win,
-                                         self.img, 0, 0)
-        self.draw_button_labels()
+        try:
+            self.mlx.mlx_put_image_to_window(self.mlx_ptr, self.win,
+                                             self.img, 0, 0)
+            self.draw_button_labels()
+        except KeyboardInterrupt:
+            self.mlx.mlx_loop_exit(self.mlx_ptr)
+            return
 
     def draw_maze(self) -> None:
         """Affiche la fenêtre et le maze"""

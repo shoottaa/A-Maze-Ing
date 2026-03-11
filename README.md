@@ -23,17 +23,16 @@ make install
 
 Crée un environnement virtuel Python et installe toutes les dépendances.
 
+```bash
+pip install mlx-2.2-py3-none-any.whl
+```
+
+Permet l'utilisation de la MLX.
+
 ### Lancement
 
 ```bash
 make run
-```
-
-Ou manuellement :
-
-```bash
-make -C mlx_CLXV
-.venv/bin/python a_maze_ing.py config.txt
 ```
 
 Il est possible de passer n'importe quel fichier de config :
